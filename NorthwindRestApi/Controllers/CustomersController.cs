@@ -8,8 +8,15 @@ namespace NorthwindRestApi.Controllers
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        //Alustetaan tietokantayhteys
-        NorthwindContext db = new NorthwindContext();
+        //Alustetaan tietokantayhteys:
+        //Perinteinen tapa: NorthwindContext db = new NorthwindContext();
+        //Dependency injektion tapa
+        NorthwindContext db;
+
+        public CustomersController (NorthwindContext dbparametri)
+        {
+            db = dbparametri;
+        }
 
         //Hakee kaikki asiakkaat
         [HttpGet]
@@ -83,6 +90,53 @@ namespace NorthwindRestApi.Controllers
             catch (Exception e)
             {
                 return BadRequest("Tapahtui virhe. Lue lisää: " + e.InnerException);
+            }
+        }
+
+
+        //Asiakkaan muokkaaminen
+        [HttpPut ("{id}")]
+        public ActionResult EditCustomer(string id, [FromBody] Customer customer)
+        {
+            try
+            {
+                var asiakas = db.Customers.Find(id);
+                if (asiakas != null)
+                {
+                    asiakas.CompanyName = customer.CompanyName;
+                    asiakas.ContactName = customer.ContactName;
+                    asiakas.Address = customer.Address;
+                    asiakas.City = customer.City;
+                    asiakas.Region = customer.Region;
+                    asiakas.PostalCode = customer.PostalCode;
+                    asiakas.Country = customer.Country;
+                    asiakas.Phone = customer.Phone;
+                    asiakas.Fax = customer.Fax;
+
+                    db.SaveChanges();
+                    return Ok("Muokattu asiakasta " + asiakas.ContactName);
+                }
+                return NotFound("Asiakas ei löytynyt id:llä " + id);
+            }
+            catch (Exception e)
+            {
+                return BadRequest("Tapahtui virhe. Lue lisää: " + e.InnerException );
+            }
+        }
+
+        //Hakee nimen osalla
+        [HttpGet ("Company/{cname}")]
+        public ActionResult GetByName(string cname)
+        {
+            try
+            {
+                var cust = db.Customers.Where(c => c.CompanyName.Contains(cname));
+                // var cust = db.Customers.Where(c => c.CompanyName == cname)
+                return Ok(cust);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
     }
