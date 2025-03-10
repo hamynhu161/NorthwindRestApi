@@ -62,7 +62,7 @@ namespace NorthwindRestApi.Controllers
         {
             if (id != employee.EmployeeId)
             {
-                return BadRequest("Tapahtui virhe.");
+                return BadRequest($"Tapahtui virhe. id {id} ei ole olemassa");
             }
 
             _context.Entry(employee).State = EntityState.Modified;
@@ -79,11 +79,11 @@ namespace NorthwindRestApi.Controllers
                 }
                 else
                 {
-                    throw;
+                    return StatusCode(500, "Yritä uudelleen.");
                 }
             }
 
-            return NoContent();
+            return Ok($"Työntekijä päivitetty onnistuneesti id:llä {id}.");
         }
 
         // POST: api/Employees
@@ -113,7 +113,7 @@ namespace NorthwindRestApi.Controllers
             var employee = await _context.Employees.FindAsync(id);
             if (employee == null)
             {
-                return NotFound("Työntekijää ei löytynyt\"");
+                return NotFound("Työntekijää ei löytynyt.");
             }
 
             _context.Employees.Remove(employee);

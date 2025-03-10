@@ -62,7 +62,7 @@ namespace NorthwindRestApi.Controllers
         {
             if (id != product.ProductId)
             {
-                return BadRequest();
+                return BadRequest($"Tapahtui virhe. id {id} ei ole olemassa");
             }
 
             _context.Entry(product).State = EntityState.Modified;
@@ -79,11 +79,11 @@ namespace NorthwindRestApi.Controllers
                 }
                 else
                 {
-                    throw;
+                    return StatusCode(500, "Yritä uudelleen.");
                 }
             }
 
-            return NoContent();
+            return Ok($"Tuote päivitetty onnistuneesti id:llä {id}.");
         }
 
         // POST: api/Products
