@@ -35,13 +35,13 @@ namespace NorthwindRestApi.Controllers
 
             if (product == null)
             {
-                return NotFound("Tuotetta ei löytynyt");
+                return NotFound("Tuotetta ei löytynyt id:lla" + id);
             }
 
             return product;
         }
 
-        //Get: api/Products/Unit Price < 20
+        //Hakee tuotteet hinnan mukaan
         [HttpGet("UnitPrice/{price}")]
         public async Task<ActionResult<Product>> GetProductsByPrice(decimal price)
         {
@@ -75,7 +75,7 @@ namespace NorthwindRestApi.Controllers
             {
                 if (!ProductExists(id))
                 {
-                    return NotFound();
+                    return NotFound("Tuotetta ei löytynyt id:lla" + id);
                 }
                 else
                 {
@@ -91,10 +91,18 @@ namespace NorthwindRestApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct([FromBody]Product product)
         {
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetProduct", new { id = product.ProductId }, product);
+                return Ok($"Lisättiin uusi tuote {product.ProductName} id: {product.ProductId}.");
+            }
+            catch (DbUpdateException ex)
+            {
+                var innerException = ex.InnerException?.Message;
+                return StatusCode(500, new { message = "Database update failed", details = innerException });
+            }
         }
 
         // DELETE: api/Products/5
@@ -104,13 +112,13 @@ namespace NorthwindRestApi.Controllers
             var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
-                return NotFound();
+                return NotFound("Tuotetta ei löytynyt");
             }
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("Tuote poistettiin.");
         }
 
         private bool ProductExists(int id)

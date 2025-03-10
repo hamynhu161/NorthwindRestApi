@@ -89,12 +89,21 @@ namespace NorthwindRestApi.Controllers
         // POST: api/Employees
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
+        public async Task<ActionResult<Employee>> PostEmployee([FromBody]Employee employee)
         {
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Employees.Add(employee);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetEmployee", new { id = employee.EmployeeId }, employee);
+                return Ok($"Lisättiin uusi työntekijä {employee.EmployeeId}");
+            }
+            catch (DbUpdateException ex)
+            {
+                var innerException = ex.InnerException?.Message;
+                return StatusCode(500, new { message = "Database update failed", details = innerException });
+            }
+
         }
 
         // DELETE: api/Employees/5
@@ -110,7 +119,7 @@ namespace NorthwindRestApi.Controllers
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("Tuote poistettiin.");
         }
 
         private bool EmployeeExists(int id)
