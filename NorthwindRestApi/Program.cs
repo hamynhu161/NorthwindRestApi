@@ -21,7 +21,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("all",
-        builder => builder.WithOrigins("http://localhost:3000")
+        builder => builder.WithOrigins(
+                "http://localhost:3000",
+                "http://localhost:5174")
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials());                       //allow the frontend JavaScript code to access the response body of a cross-origin request when authentication is involved
